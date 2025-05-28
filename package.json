@@ -1,0 +1,15 @@
+{
+  "name": "stock-event-analyzer",
+  "version": "1.0.0",
+  "description": "Stock Event Analyzer - Full Stack Application",
+  "scripts": {
+    "start": "npm run kill-ports && echo \"Starting both servers...\" && start \"Backend\" cmd /k \"cd stock-event-analyzer-backend && npm start\" && timeout /t 3 > nul && start \"Frontend\" cmd /k \"cd stock-event-analyzer-frontend && npm run dev\"",
+    "start:clean": "npm run kill-ports && npm run start",
+    "start:backend": "npm run kill-ports && cd stock-event-analyzer-backend && npm start",
+    "start:frontend": "npm run kill-ports && cd stock-event-analyzer-frontend && npm run dev",
+    "kill-ports": "taskkill /f /im node.exe >nul 2>&1 || echo \"No Node processes to kill\"",
+    "install:all": "cd stock-event-analyzer-backend && npm install && cd ../stock-event-analyzer-frontend && npm install"
+  },
+  "author": "",
+  "license": "ISC"
+} 
