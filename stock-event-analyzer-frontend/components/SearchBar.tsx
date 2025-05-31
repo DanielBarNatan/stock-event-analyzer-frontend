@@ -36,29 +36,31 @@ export default function SearchBar({ onSearchResults, onLoading }: SearchBarProps
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-2xl flex items-center bg-white dark:bg-gray-800 rounded-full shadow-2xl px-8 py-5 border-2 border-fuchsia-300 dark:border-fuchsia-700 focus-within:ring-4 focus-within:ring-fuchsia-400/40 transition-all">
-      <input
-        type="text"
-        placeholder="Search events or stocks..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        disabled={isSearching}
-        className="flex-grow bg-transparent outline-none text-2xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 px-4 py-2 disabled:opacity-50"
-        aria-label="Search events or stocks"
-      />
-      <button 
-        type="submit" 
-        disabled={isSearching || !query.trim()}
-        className="ml-5 p-4 rounded-full bg-gradient-to-r from-blue-500 via-fuchsia-500 to-yellow-400 hover:from-blue-600 hover:via-fuchsia-600 hover:to-yellow-500 text-white text-2xl font-bold shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-fuchsia-400 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isSearching ? (
-          <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-        ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
-          </svg>
-        )}
-      </button>
+    <form onSubmit={handleSubmit} className="w-full">
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Search events or stocks..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          disabled={isSearching}
+          className="w-full h-14 px-5 pr-16 bg-black/20 text-white rounded-xl border border-white/10 outline-none transition-all focus:border-blue-500 placeholder-white/40 text-lg"
+          aria-label="Search events or stocks"
+        />
+        <button 
+          type="submit" 
+          disabled={isSearching || !query.trim()}
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSearching ? (
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+            </svg>
+          )}
+        </button>
+      </div>
     </form>
   );
 } 

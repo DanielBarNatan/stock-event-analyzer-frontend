@@ -125,10 +125,10 @@ export default function RegisterForm() {
           </div>
           <h1 className="text-5xl font-extrabold tracking-tight mb-2">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-blue-500 to-indigo-500 animate-gradient-x">
-              Create Account
+              Intelligen<span className="text-white font-black">T</span>rader
             </span>
           </h1>
-          <p className="text-blue-200 text-lg mb-2">Join our community of market analysts</p>
+          <p className="text-blue-200 text-lg mb-2">Create your account today</p>
           <div className="flex justify-center space-x-1">
             <span className="w-2 h-2 bg-purple-400 rounded-full animate-ping"></span>
             <span className="w-2 h-2 bg-blue-400 rounded-full animate-ping [animation-delay:0.2s]"></span>

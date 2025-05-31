@@ -130,7 +130,7 @@ export default function LoginForm() {
           </div>
           <h1 className="text-5xl font-extrabold tracking-tight mb-2">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 animate-gradient-x">
-              StockPulse
+              Intelligen<span className="text-white font-black">T</span>rader
             </span>
           </h1>
           <p className="text-blue-200 text-lg mb-2">Innovative Market Intelligence</p>

@@ -1,27 +1,76 @@
 import SearchBar from "./SearchBar";
 import EventResult from "./EventResult";
 import StockChart from "./StockChart";
+import NewsArticles from "./NewsArticles";
 import { useState, useCallback, useEffect } from "react";
 import AuthNav from "./auth/AuthNav";
 
-type ActiveTab = 'events' | 'stocks';
+// Updated tab types to include all possible tabs
+type ActiveTab = 'search' | 'historical' | 'news' | 'charts';
+
+// Define article interface
+interface Article {
+  title: string;
+  description: string;
+  url: string;
+  source: string;
+  publishedAt: string;
+  urlToImage: string;
+}
 
 export default function StockAnalyzer() {
   const [searchResults, setSearchResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('events');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('search');
+  
+  // Track if a search has been performed
+  const [hasSearched, setHasSearched] = useState(false);
+  
+  // News article state
+  const [article, setArticle] = useState<Article | null>(null);
+  const [isLoadingNews, setIsLoadingNews] = useState(false);
   
   // Stock chart state
   const [stockData, setStockData] = useState(null);
   const [isLoadingStock, setIsLoadingStock] = useState(false);
-  const [fromEventSearch, setFromEventSearch] = useState(false);
 
-  const handleSearchResults = (data: any) => {
+  const handleSearchResults = async (data: any) => {
     setSearchResults(data);
-    // If we got valid event data, switch to stocks tab and mark as from event search
+    
+    // If we got valid event data, mark as searched and show historical tab
     if (data && !data.error) {
-      setActiveTab('stocks');
-      setFromEventSearch(true);
+      setHasSearched(true);
+      setActiveTab('historical');
+      
+      // Fetch news data
+      await fetchNewsArticles(data.event);
+      
+      // Fetch stock data using the event date
+      const eventDate = getEventDate(data);
+      if (eventDate) {
+        handleFetchStockData(eventDate);
+      }
+    }
+  };
+
+  const fetchNewsArticles = async (eventQuery: string) => {
+    setIsLoadingNews(true);
+    try {
+      const response = await fetch(`http://localhost:4000/api/news-articles?query=${encodeURIComponent(eventQuery)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const newsData = await response.json();
+      if (newsData.article) {
+        setArticle(newsData.article);
+      } else {
+        setArticle(null);
+      }
+    } catch (error) {
+      console.error('Failed to fetch news article:', error);
+      setArticle(null);
+    } finally {
+      setIsLoadingNews(false);
     }
   };
 
@@ -50,10 +99,10 @@ export default function StockAnalyzer() {
   }, []);
 
   // Parse event date for stock chart
-  const getEventDate = (): string | undefined => {
-    if (!searchResults || (searchResults as any).error) return undefined;
+  const getEventDate = (data: any): string | undefined => {
+    if (!data || data.error) return undefined;
     
-    const eventDate = (searchResults as any).date;
+    const eventDate = data.date;
     if (!eventDate) return undefined;
     
     // Parse different date formats (YYYY, YYYY-MM, YYYY-MM-DD)
@@ -72,98 +121,245 @@ export default function StockAnalyzer() {
     return parsedDate;
   };
 
-  // Reset fromEventSearch when manually switching tabs
+  // Reset search state when clicking back to search
+  const handleBackToSearch = () => {
+    setActiveTab('search');
+    setHasSearched(false);
+    setSearchResults(null);
+    setArticle(null);
+    setStockData(null);
+  };
+
+  // Handle tab changes
   const handleTabChange = (tab: ActiveTab) => {
     setActiveTab(tab);
-    if (tab === 'events') {
-      setFromEventSearch(false);
-    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-tr from-blue-500 via-fuchsia-400 to-yellow-300 dark:from-blue-900 dark:via-fuchsia-900 dark:to-yellow-700 p-6">
-      {/* Add AuthNav at the top */}
-      <div className="w-full max-w-3xl flex justify-end mb-4">
-        <AuthNav />
+    <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900 p-6 relative overflow-hidden">
+      {/* Static background elements */}
+      <div className="absolute w-[600px] h-[600px] rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-3xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+      
+      {/* Header bar with navigation - full width and extra padding */}
+      <div className="w-full px-4 sm:px-8 lg:px-12 mt-2 mb-10 z-10">
+        <div className="w-full max-w-[1400px] mx-auto flex justify-between items-center">
+          <div className="flex items-center">
+            <div className="h-10 w-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-white ml-3 hidden sm:block">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-500">
+                Intelligen<span className="text-white font-black">T</span>rader
+              </span>
+            </h2>
+          </div>
+          <AuthNav />
+        </div>
       </div>
       
-      {/* Header Section */}
-      <div className="w-full max-w-3xl bg-white/95 dark:bg-gray-900/90 rounded-4xl shadow-2xl px-12 py-20 flex flex-col items-center space-y-12 border-2 border-blue-200 dark:border-fuchsia-800 relative mt-10">
-        <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-40 h-3 rounded-full bg-gradient-to-r from-blue-500 via-fuchsia-400 to-yellow-300 dark:from-blue-700 dark:via-fuchsia-700 dark:to-yellow-500 shadow-lg"></div>
-        <h1 className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-fuchsia-600 to-yellow-500 dark:from-blue-300 dark:via-fuchsia-400 dark:to-yellow-300 mb-4 drop-shadow-xl">Stock Event Analyzer</h1>
-        <p className="text-2xl text-gray-800 dark:text-gray-100 mb-8 font-semibold max-w-2xl mx-auto text-center">
-          Discover how key events impact the market.<br />
-          <span className="text-fuchsia-600 dark:text-fuchsia-300">Search for events</span> and see their market effects instantly.
-        </p>
+      {/* Main content area */}
+      <div className="w-full max-w-4xl z-10">
+        {/* Header Section */}
+        <div className="text-center mb-10">
+          <h1 className="text-6xl font-extrabold tracking-tight mb-3">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-500">
+              Intelligen<span className="text-white font-black">T</span>rader
+            </span>
+          </h1>
+          <p className="text-xl text-blue-200 mb-6">
+            Discover how key events impact the market.
+            <span className="block mt-2">Search for events and analyze their market effects instantly.</span>
+          </p>
+        </div>
         
-        {/* Tab Navigation */}
-        <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-2 mb-6">
-          <button
-            onClick={() => handleTabChange('events')}
-            className={`px-8 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === 'events'
-                ? 'bg-gradient-to-r from-blue-500 via-fuchsia-500 to-yellow-400 text-white shadow-lg'
-                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-            }`}
-          >
-            🔍 Historical Events
-          </button>
-          <button
-            onClick={() => handleTabChange('stocks')}
-            className={`px-8 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === 'stocks'
-                ? 'bg-gradient-to-r from-blue-500 via-fuchsia-500 to-yellow-400 text-white shadow-lg'
-                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-            }`}
-          >
-            📈 S&P 500 Charts
-          </button>
+        {/* Main card */}
+        <div className="bg-black/20 backdrop-blur-xl rounded-3xl shadow-xl border border-white/10 overflow-hidden">
+          {/* Tab Navigation */}
+          <div className="flex border-b border-white/10">
+            {!hasSearched ? (
+              // Only show Historical Events search tab when no search has been performed
+              <button
+                className="px-8 py-5 font-medium text-lg transition-all flex-1 text-white bg-white/5 border-b-2 border-blue-500"
+              >
+                <span className="flex items-center justify-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Historical Events
+                </span>
+              </button>
+            ) : (
+              // Show all tabs after search is performed
+              <>
+                {/* Back to Search button */}
+                <button
+                  onClick={handleBackToSearch}
+                  className="px-6 py-5 font-medium text-lg transition-all text-blue-200/70 hover:text-blue-200 hover:bg-white/5"
+                >
+                  <span className="flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    New Search
+                  </span>
+                </button>
+
+                {/* Historical Data tab */}
+                <button
+                  onClick={() => handleTabChange('historical')}
+                  className={`px-6 py-5 font-medium text-lg transition-all flex-1 ${
+                    activeTab === 'historical'
+                      ? 'text-white bg-white/5 border-b-2 border-blue-500'
+                      : 'text-blue-200/70 hover:text-blue-200 hover:bg-white/5'
+                  }`}
+                >
+                  <span className="flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Historical Data
+                  </span>
+                </button>
+                
+                {/* News tab */}
+                <button
+                  onClick={() => handleTabChange('news')}
+                  className={`px-6 py-5 font-medium text-lg transition-all flex-1 ${
+                    activeTab === 'news'
+                      ? 'text-white bg-white/5 border-b-2 border-purple-500'
+                      : 'text-blue-200/70 hover:text-blue-200 hover:bg-white/5'
+                  }`}
+                >
+                  <span className="flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                    News
+                  </span>
+                </button>
+                
+                {/* Charts tab */}
+                <button
+                  onClick={() => handleTabChange('charts')}
+                  className={`px-6 py-5 font-medium text-lg transition-all flex-1 ${
+                    activeTab === 'charts'
+                      ? 'text-white bg-white/5 border-b-2 border-indigo-500'
+                      : 'text-blue-200/70 hover:text-blue-200 hover:bg-white/5'
+                  }`}
+                >
+                  <span className="flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                    </svg>
+                    S&P 500 Charts
+                  </span>
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Content Area */}
+          <div className="p-8">
+            {/* Initial Search Area */}
+            {!hasSearched && (
+              <div>
+                <SearchBar onSearchResults={handleSearchResults} onLoading={handleLoading} />
+                {isLoading && (
+                  <div className="mt-8 bg-black/30 backdrop-blur-md rounded-xl p-6 border border-white/10 flex items-center justify-center">
+                    <div className="flex items-center justify-center space-x-3">
+                      <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-lg text-blue-200">Analyzing market events...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Historical Data Tab Content */}
+            {hasSearched && activeTab === 'historical' && searchResults && !isLoading && (
+              <div>
+                <EventResult 
+                  data={searchResults}
+                  isLoading={false}
+                />
+              </div>
+            )}
+
+            {/* News Tab Content */}
+            {hasSearched && activeTab === 'news' && (
+              <div>
+                {article ? (
+                  <NewsArticles 
+                    article={article}
+                    isLoading={isLoadingNews}
+                  />
+                ) : isLoadingNews ? (
+                  <div className="bg-black/30 backdrop-blur-md rounded-xl p-6 border border-white/10 flex items-center justify-center">
+                    <div className="flex items-center justify-center space-x-3">
+                      <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-lg text-blue-200">Loading related news...</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-black/30 backdrop-blur-md rounded-xl p-6 border border-white/10 text-center">
+                    <svg className="w-12 h-12 mx-auto text-blue-400/50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                    <h3 className="text-xl font-bold text-blue-300 mb-2">No News Available</h3>
+                    <p className="text-blue-200/70">We couldn't find any related news articles for this event.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Charts Tab Content */}
+            {hasSearched && activeTab === 'charts' && (
+              <div>
+                {stockData ? (
+                  <StockChart 
+                    onFetchData={handleFetchStockData}
+                    stockData={stockData}
+                    isLoading={isLoadingStock}
+                    symbol="SPY"
+                    eventDate={searchResults ? getEventDate(searchResults) : undefined}
+                  />
+                ) : isLoadingStock ? (
+                  <div className="bg-black/30 backdrop-blur-md rounded-xl p-6 border border-white/10 flex items-center justify-center">
+                    <div className="flex items-center justify-center space-x-3">
+                      <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-lg text-blue-200">Loading market data...</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-black/30 backdrop-blur-md rounded-xl p-6 border border-white/10 text-center">
+                    <svg className="w-12 h-12 mx-auto text-blue-400/50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                    </svg>
+                    <h3 className="text-xl font-bold text-blue-300 mb-2">No Chart Data Available</h3>
+                    <p className="text-blue-200/70">We couldn't generate chart data for this event. Please try searching for a different event.</p>
+                    <button 
+                      onClick={() => searchResults && handleFetchStockData(getEventDate(searchResults) || '2020-01-01')}
+                      className="mt-4 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-300 hover:bg-blue-500/30 transition-colors"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-
-        {/* Conditional Search Bar - Only show for events tab */}
-        {activeTab === 'events' && (
-          <div className="w-full flex justify-center">
-            <SearchBar onSearchResults={handleSearchResults} onLoading={handleLoading} />
+        
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center space-x-1 bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-medium text-blue-200">
+            <span className="w-2 h-2 rounded-full bg-green-400"></span>
+            <span>Real-time market analysis</span>
           </div>
-        )}
-
-        {/* Show search bar on stocks tab if we came from event search */}
-        {activeTab === 'stocks' && fromEventSearch && (
-          <div className="w-full flex justify-center">
-            <SearchBar onSearchResults={handleSearchResults} onLoading={handleLoading} />
-          </div>
-        )}
+        </div>
       </div>
-
-      {/* Results Section - Events */}
-      {activeTab === 'events' && (isLoading || searchResults) && (
-        <div className="mt-12 w-full flex justify-center">
-          <EventResult data={searchResults} isLoading={isLoading} />
-        </div>
-      )}
-
-      {/* Results Section - Stock Chart */}
-      {activeTab === 'stocks' && (
-        <>
-          {/* Show event result if we came from event search */}
-          {fromEventSearch && searchResults && !(searchResults as any).error && !isLoading && (
-            <div className="mt-12 w-full flex justify-center">
-              <EventResult data={searchResults} isLoading={false} />
-            </div>
-          )}
-          
-          {/* Stock Chart */}
-          <div className="mt-12 w-full flex justify-center">
-            <StockChart 
-              onFetchData={handleFetchStockData}
-              stockData={stockData}
-              isLoading={isLoadingStock}
-              symbol="SPY"
-              eventDate={fromEventSearch ? getEventDate() : undefined}
-            />
-          </div>
-        </>
-      )}
     </div>
   );
 } 
