@@ -1,22 +1,20 @@
-"use client";
+'use client';
 
-import { useAuth } from '../contexts/AuthContext';
-import { useRouter, usePathname } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import StockAnalyzer from '../components/StockAnalyzer';
+import LoginForm from '../../components/auth/LoginForm';
 
-export default function Home() {
+export default function LoginPage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/login');
+    if (!isLoading && user) {
+      router.push('/');
     }
   }, [user, isLoading, router]);
 
-  // Show loading while checking auth status
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -28,12 +26,9 @@ export default function Home() {
     );
   }
 
-  // Only show StockAnalyzer on the root path
-  if (user && pathname === '/') {
-    return <StockAnalyzer />;
+  if (!user) {
+    return <LoginForm />;
   }
 
-  // Return null while redirecting
   return null;
-}
-
+} 

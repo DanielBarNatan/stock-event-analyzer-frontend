@@ -30,6 +30,9 @@ app.get('/', (req, res) => {
   res.json({ message: 'Stock Event Analyzer API is running!' });
 });
 
+// Auth routes
+app.use('/api/auth', require('./auth/authRoutes'));
+
 // Helper function to calculate dates
 function addDays(date, days) {
   const result = new Date(date);

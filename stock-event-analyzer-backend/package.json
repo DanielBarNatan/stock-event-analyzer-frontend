@@ -17,6 +17,9 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "openai": "^4.76.1",
-    "recharts": "^2.15.3"
+    "recharts": "^2.15.3",
+    "sqlite3": "^5.1.6",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
   }
 }
