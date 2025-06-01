@@ -18,6 +18,11 @@ interface Article {
   urlToImage: string;
 }
 
+// Function to get the API base URL
+const getApiBaseUrl = () => {
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+};
+
 export default function StockAnalyzer() {
   const [searchResults, setSearchResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +63,7 @@ export default function StockAnalyzer() {
     try {
       // Add a try-catch around the fetch request
       try {
-        const response = await fetch(`http://localhost:4000/api/news-articles?query=${encodeURIComponent(eventQuery)}`);
+        const response = await fetch(`${getApiBaseUrl()}/api/news-articles?query=${encodeURIComponent(eventQuery)}`);
         if (!response.ok) {
           console.error(`News API HTTP error! status: ${response.status}`);
           setArticle(null);
@@ -89,7 +94,7 @@ export default function StockAnalyzer() {
   const handleFetchStockData = useCallback(async (startDate: string) => {
     setIsLoadingStock(true);
     try {
-      const response = await fetch(`http://localhost:4000/api/sp500-data?startDate=${startDate}`);
+      const response = await fetch(`${getApiBaseUrl()}/api/sp500-data?startDate=${startDate}`);
       const data = await response.json();
       
       if (response.ok) {

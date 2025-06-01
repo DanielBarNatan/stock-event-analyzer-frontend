@@ -19,6 +19,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Function to get the API base URL
+const getApiBaseUrl = () => {
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -37,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (username: string, password: string) => {
-    const response = await fetch('http://localhost:4000/api/auth/login', {
+    const response = await fetch(`${getApiBaseUrl()}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (username: string, email: string, password: string) => {
-    const response = await fetch('http://localhost:4000/api/auth/register', {
+    const response = await fetch(`${getApiBaseUrl()}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

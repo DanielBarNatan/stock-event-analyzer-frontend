@@ -9,6 +9,11 @@ export default function SearchBar({ onSearchResults, onLoading }: SearchBarProps
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
+  // Function to get the API base URL
+  const getApiBaseUrl = () => {
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
@@ -17,7 +22,7 @@ export default function SearchBar({ onSearchResults, onLoading }: SearchBarProps
     onLoading(true);
 
     try {
-      const response = await fetch(`http://localhost:4000/api/historical-event?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`${getApiBaseUrl()}/api/historical-event?query=${encodeURIComponent(query)}`);
       const data = await response.json();
       
       if (response.ok) {
