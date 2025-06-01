@@ -56,14 +56,22 @@ export default function StockAnalyzer() {
   const fetchNewsArticles = async (eventQuery: string) => {
     setIsLoadingNews(true);
     try {
-      const response = await fetch(`http://localhost:4000/api/news-articles?query=${encodeURIComponent(eventQuery)}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const newsData = await response.json();
-      if (newsData.article) {
-        setArticle(newsData.article);
-      } else {
+      // Add a try-catch around the fetch request
+      try {
+        const response = await fetch(`http://localhost:4000/api/news-articles?query=${encodeURIComponent(eventQuery)}`);
+        if (!response.ok) {
+          console.error(`News API HTTP error! status: ${response.status}`);
+          setArticle(null);
+          return; // Exit early
+        }
+        const newsData = await response.json();
+        if (newsData.article) {
+          setArticle(newsData.article);
+        } else {
+          setArticle(null);
+        }
+      } catch (fetchError) {
+        console.error('Failed to connect to news API:', fetchError);
         setArticle(null);
       }
     } catch (error) {

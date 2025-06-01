@@ -177,6 +177,45 @@ app.get('/api/historical-event', async (req, res) => {
   "description": "Detailed description of what happened on this specific date",
   "reason": "Why this event matches the search query",
   "impact": "How this affected markets/economy starting from this date",
+  "whyThisMatters": "A concise sentence that summarizes the significance of the event to markets, such as 'This event triggered widespread concern over inflation, leading investors to pull out of growth stocks.'",
+  "simplifiedExplanation": "A beginner-friendly explanation of this event using simple language, avoiding jargon, and explaining why it was important in a way that someone with no financial background could understand.",
+  "marketAnalysis": {
+    "shortTerm": "Detailed explanation of the immediate market reaction (1-7 days) with specific market movements and sectors affected",
+    "mediumTerm": "Analysis of how markets evolved in the weeks and months following the event, including recovery patterns or continued decline",
+    "longTerm": "Explanation of lasting market impacts and potential policy changes that resulted from this event",
+    "simplifiedExplanation": "An explanation of market reactions in simple terms that anyone could understand, explaining what happened to stocks, bonds, and other investments in plain language"
+  },
+  "economicIndicators": {
+    "gdpImpact": "How this event affected GDP growth",
+    "employmentImpact": "Effects on employment/unemployment rates",
+    "interestRates": "Changes to interest rate policy that resulted from this event",
+    "inflation": "Impact on inflation/deflation trends",
+    "simplifiedExplanation": "A simple explanation of how this event affected the overall economy, jobs, prices, and interest rates in everyday terms"
+  },
+  "investorLessons": "2-3 key takeaways or lessons that investors learned from this event that remain valuable today",
+  "glossary": {
+    "Term 1": "Simple definition of financial term mentioned in the analysis",
+    "Term 2": "Simple definition of financial term mentioned in the analysis",
+    "Term 3": "Simple definition of financial term mentioned in the analysis",
+    "Term 4": "Simple definition of financial term mentioned in the analysis",
+    "Term 5": "Simple definition of financial term mentioned in the analysis"
+  },
+  "relatedEvents": [
+    {
+      "event": "Similar historical event 1",
+      "date": "YYYY-MM-DD",
+      "note": "Brief note about how this relates to the main event",
+      "comparison": "Specific comparison of market impacts between this event and the main event",
+      "simplifiedExplanation": "A simple explanation of how this related event is similar to or different from the main event in everyday terms"
+    },
+    {
+      "event": "Similar historical event 2",
+      "date": "YYYY-MM-DD",
+      "note": "Brief note about how this relates to the main event",
+      "comparison": "Specific comparison of market impacts between this event and the main event",
+      "simplifiedExplanation": "A simple explanation of how this related event is similar to or different from the main event in everyday terms"
+    }
+  ],
   "source": "General historical source or 'Historical records'"
 }
 
@@ -187,14 +226,14 @@ Make sure the response is valid JSON only, no additional text. Focus on the spec
       messages: [
         {
           role: "system",
-          content: "You are a financial historian who provides accurate, structured data about specific U.S. historical events and their market impacts. When a user asks about a specific event, provide information about that exact event, including the precise date (YYYY-MM-DD format) when it occurred. Research the exact date the event happened or officially began. Always respond with valid JSON only."
+          content: "You are a financial historian and market analyst who provides accurate, structured data about specific U.S. historical events and their market impacts. Make complex financial concepts accessible to everyone by providing both detailed professional analysis and simplified explanations that anyone can understand. Include a glossary of key financial terms to help beginners. Provide comprehensive analysis including immediate market reactions, medium and long-term impacts, and effects on key economic indicators. Include detailed investment lessons learned from these events that remain relevant today. When a user asks about a specific event, provide information about that exact event, including the precise date (YYYY-MM-DD format) when it occurred. Include why the event matters to investors and related historical events with detailed comparisons. Research the exact date the event happened or officially began. Always respond with valid JSON only."
         },
         {
           role: "user",
           content: prompt
         }
       ],
-      max_tokens: 500,
+      max_tokens: 1500,
       temperature: 0.2,
     });
 
