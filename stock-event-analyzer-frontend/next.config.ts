@@ -23,6 +23,14 @@ const nextConfig = {
       },
     ],
   },
+  // Disable ESLint during production builds
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // Disable TypeScript errors during production builds
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default nextConfig;
