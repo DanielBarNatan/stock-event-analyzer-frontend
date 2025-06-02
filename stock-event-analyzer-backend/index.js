@@ -266,18 +266,12 @@ app.get('/api/news-articles', async (req, res) => {
       return res.status(500).json({ error: 'News API key not configured' });
     }
 
-    // Calculate date 30 days ago for the 'from' parameter
-    const fromDate = new Date();
-    fromDate.setDate(fromDate.getDate() - 30);
-    const fromDateString = fromDate.toISOString().split('T')[0];
-
-    // Fetch news articles from News API
+    // Fetch 3 articles from News API
     const newsApiUrl = `https://newsapi.org/v2/everything?` +
       `q=${encodeURIComponent(query)}` +
-      `&from=${fromDateString}` +
       `&sortBy=relevancy` +
       `&language=en` +
-      `&pageSize=1` +
+      `&pageSize=3` +
       `&apiKey=${process.env.NEWS_API_KEY}`;
     
     const response = await axios.get(newsApiUrl, {
@@ -296,21 +290,21 @@ app.get('/api/news-articles', async (req, res) => {
       return res.status(404).json({ error: 'No articles found' });
     }
 
-    // Get the first article
-    const article = data.articles[0];
+    // Process articles to ensure they have all required fields
+    const articles = data.articles.map(article => ({
+      title: article.title || 'No title available',
+      description: article.description || 'No description available',
+      url: article.url,
+      source: article.source?.name || 'Unknown source',
+      publishedAt: article.publishedAt || new Date().toISOString(),
+      urlToImage: article.urlToImage || null
+    }));
 
-    // Return only one article
+    // Return all articles
     res.json({
       query,
       totalResults: data.totalResults,
-      article: {
-        title: article.title || 'No title available',
-        description: article.description || 'No description available',
-        url: article.url,
-        source: article.source?.name || 'Unknown source',
-        publishedAt: article.publishedAt || new Date().toISOString(),
-        urlToImage: article.urlToImage || null
-      }
+      articles
     });
 
   } catch (error) {
