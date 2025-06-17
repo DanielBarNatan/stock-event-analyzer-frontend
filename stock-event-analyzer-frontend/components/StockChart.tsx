@@ -8,7 +8,7 @@ interface StockDataPoint {
   close: number;
 }
 
-interface StockData {
+export interface StockData {
   oneWeek: StockDataPoint[];
   oneMonth: StockDataPoint[];
   threeMonths: StockDataPoint[];

@@ -5,6 +5,9 @@ import NewsArticle from "./NewsArticle";
 import { useState, useCallback, useEffect } from "react";
 import AuthNav from "./auth/AuthNav";
 
+// Import the StockData interface from StockChart
+import type { StockData } from "./StockChart";
+
 // Updated tab types to include all possible tabs
 type ActiveTab = 'search' | 'historical' | 'news' | 'charts';
 
@@ -64,8 +67,8 @@ export default function StockAnalyzer() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [isLoadingNews, setIsLoadingNews] = useState(false);
   
-  // Stock chart state
-  const [stockData, setStockData] = useState(null);
+  // Stock chart state - properly typed now
+  const [stockData, setStockData] = useState<StockData | null>(null);
   const [isLoadingStock, setIsLoadingStock] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [animatedIndex, setAnimatedIndex] = useState(-1);
@@ -99,7 +102,7 @@ export default function StockAnalyzer() {
   const fetchNewsArticles = async (eventQuery: string) => {
     setIsLoadingNews(true);
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/news?query=${encodeURIComponent(eventQuery)}`);
+      const response = await fetch(`${getApiBaseUrl()}/api/news-articles?query=${encodeURIComponent(eventQuery)}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -145,10 +148,27 @@ export default function StockAnalyzer() {
       if (!eventDate) return;
       
       try {
-        const response = await fetch(`${getApiBaseUrl()}/api/stock-data?date=${encodeURIComponent(eventDate)}`);
+        console.log("Fetching stock data for date:", eventDate);
+        const response = await fetch(`${getApiBaseUrl()}/api/sp500-data?startDate=${encodeURIComponent(eventDate)}`);
         if (response.ok) {
-          const data = await response.json();
-          setStockData(data);
+          const responseData = await response.json();
+          console.log("Stock data received:", responseData);
+          
+          // The API returns data in a nested 'data' property
+          const stockData = responseData.data;
+          
+          console.log("Data structure:", {
+            hasOneWeek: Array.isArray(stockData?.oneWeek),
+            oneWeekLength: stockData?.oneWeek?.length,
+            hasOneMonth: Array.isArray(stockData?.oneMonth),
+            oneMonthLength: stockData?.oneMonth?.length,
+            hasThreeMonths: Array.isArray(stockData?.threeMonths),
+            threeMonthsLength: stockData?.threeMonths?.length,
+            hasSixMonths: Array.isArray(stockData?.sixMonths),
+            sixMonthsLength: stockData?.sixMonths?.length
+          });
+          
+          setStockData(stockData);
         } else {
           console.error('Failed to fetch stock data');
           setStockData(null);
@@ -432,7 +452,26 @@ export default function StockAnalyzer() {
             {hasSearched && activeTab === 'charts' && (
               <div>
                 {stockData ? (
-                  <StockChart data={stockData} eventDate={getEventDate(searchResults)} />
+                  <>
+                    <div className="mb-4 p-4 bg-black/20 rounded-xl">
+                      <h3 className="text-white font-medium">Debug Info:</h3>
+                      <pre className="text-xs text-blue-200 overflow-auto max-h-40">
+                        {JSON.stringify({
+                          stockDataType: typeof stockData,
+                          hasData: !!stockData,
+                          hasOneWeek: Array.isArray(stockData.oneWeek),
+                          oneWeekLength: stockData.oneWeek?.length || 0,
+                          hasOneMonth: Array.isArray(stockData.oneMonth),
+                          oneMonthLength: stockData.oneMonth?.length || 0,
+                          hasThreeMonths: Array.isArray(stockData.threeMonths),
+                          threeMonthsLength: stockData.threeMonths?.length || 0,
+                          hasSixMonths: Array.isArray(stockData.sixMonths),
+                          sixMonthsLength: stockData.sixMonths?.length || 0
+                        }, null, 2)}
+                      </pre>
+                    </div>
+                    <StockChart data={stockData} eventDate={getEventDate(searchResults)} />
+                  </>
                 ) : (
                   <div className="bg-black/30 backdrop-blur-md rounded-xl p-6 border border-white/10 text-center">
                     <svg className="w-12 h-12 mx-auto text-blue-400/50 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
