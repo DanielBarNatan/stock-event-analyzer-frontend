@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { getApiBaseUrl } from "../utils/api";
 
 interface SearchBarProps {
   onSearchResults: (data: any) => void;
@@ -10,11 +11,6 @@ interface SearchBarProps {
 export default function SearchBar({ onSearchResults, onLoading, searchValue, setSearchValue }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-
-  // Function to get the API base URL
-  const getApiBaseUrl = () => {
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

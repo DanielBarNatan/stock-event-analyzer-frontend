@@ -10,6 +10,9 @@ services:
       - backend
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:4000
+    volumes:
+      # Mount the root .env file for frontend
+      - ./.env:/app/.env
     networks:
       - stock-event-network
 
@@ -26,8 +29,8 @@ services:
       - NEWS_API_KEY=${NEWS_API_KEY}
       - JWT_SECRET=${JWT_SECRET}
     volumes:
-      # Mount the .env file for backend credentials
-      - ./stock-event-analyzer-backend/.env:/app/.env
+      # Mount the root .env file for backend credentials
+      - ./.env:/app/.env
     networks:
       - stock-event-network
 

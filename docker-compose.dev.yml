@@ -16,6 +16,7 @@ services:
       - ./stock-event-analyzer-frontend:/app
       - /app/node_modules
       - /app/.next
+      - ./.env:/app/.env
     networks:
       - stock-event-network
 
@@ -35,7 +36,7 @@ services:
     volumes:
       - ./stock-event-analyzer-backend:/app
       - /app/node_modules
-      - ./stock-event-analyzer-backend/.env:/app/.env
+      - ./.env:/app/.env
     networks:
       - stock-event-network
 

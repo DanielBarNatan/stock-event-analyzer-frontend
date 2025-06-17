@@ -4,6 +4,7 @@ import StockChart from "./StockChart";
 import NewsArticle from "./NewsArticle";
 import { useState, useCallback, useEffect } from "react";
 import AuthNav from "./auth/AuthNav";
+import { getApiBaseUrl } from "../utils/api";
 
 // Import the StockData interface from StockChart
 import type { StockData } from "./StockChart";
@@ -49,11 +50,6 @@ interface Article {
   publishedAt: string;
   urlToImage: string | null;
 }
-
-// Function to get the API base URL
-const getApiBaseUrl = () => {
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-};
 
 export default function StockAnalyzer() {
   const [searchResults, setSearchResults] = useState(null);

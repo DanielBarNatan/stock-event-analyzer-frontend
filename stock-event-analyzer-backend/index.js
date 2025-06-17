@@ -3,7 +3,8 @@ const cors = require('cors');
 const OpenAI = require('openai');
 const axios = require('axios');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+// Look for .env file in the parent directory (project root)
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 // Log environment variables for debugging (remove in production)
 console.log('Environment variables loaded:', {
