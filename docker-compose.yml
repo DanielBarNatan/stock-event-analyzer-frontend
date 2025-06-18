@@ -10,9 +10,13 @@ services:
       - backend
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:4000
+      - NODE_ENV=production
     volumes:
       # Mount the root .env file for frontend
       - ./.env:/app/.env
+      # Prevent overwriting node_modules and .next
+      - /app/node_modules
+      - /app/.next
     networks:
       - stock-event-network
 
@@ -23,6 +27,7 @@ services:
       - "4000:4000"
     environment:
       - PORT=4000
+      - NODE_ENV=production
       # You'll need to provide these values via an .env file or when running docker-compose
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY}
@@ -31,6 +36,7 @@ services:
     volumes:
       # Mount the root .env file for backend credentials
       - ./.env:/app/.env
+      - /app/node_modules
     networks:
       - stock-event-network
 

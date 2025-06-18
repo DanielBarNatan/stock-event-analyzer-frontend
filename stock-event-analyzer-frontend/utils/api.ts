@@ -4,9 +4,13 @@
 export const getApiBaseUrl = () => {
   // Check if we're in a browser environment
   if (typeof window !== 'undefined') {
-    // When running in Docker, use the container name
+    // When running in Docker, use the container name for server-to-server communication
+    // but use localhost for browser-to-server communication
     if (process.env.NEXT_PUBLIC_API_URL) {
-      return process.env.NEXT_PUBLIC_API_URL;
+      // For browser requests, replace 'backend' hostname with 'localhost'
+      // because the browser can't resolve the Docker container name
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      return apiUrl.replace('http://backend:', 'http://localhost:');
     }
     
     // When running locally in development, use the current hostname

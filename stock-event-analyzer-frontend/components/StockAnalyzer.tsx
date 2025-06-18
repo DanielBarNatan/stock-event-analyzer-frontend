@@ -449,23 +449,6 @@ export default function StockAnalyzer() {
               <div>
                 {stockData ? (
                   <>
-                    <div className="mb-4 p-4 bg-black/20 rounded-xl">
-                      <h3 className="text-white font-medium">Debug Info:</h3>
-                      <pre className="text-xs text-blue-200 overflow-auto max-h-40">
-                        {JSON.stringify({
-                          stockDataType: typeof stockData,
-                          hasData: !!stockData,
-                          hasOneWeek: Array.isArray(stockData.oneWeek),
-                          oneWeekLength: stockData.oneWeek?.length || 0,
-                          hasOneMonth: Array.isArray(stockData.oneMonth),
-                          oneMonthLength: stockData.oneMonth?.length || 0,
-                          hasThreeMonths: Array.isArray(stockData.threeMonths),
-                          threeMonthsLength: stockData.threeMonths?.length || 0,
-                          hasSixMonths: Array.isArray(stockData.sixMonths),
-                          sixMonthsLength: stockData.sixMonths?.length || 0
-                        }, null, 2)}
-                      </pre>
-                    </div>
                     <StockChart data={stockData} eventDate={getEventDate(searchResults)} />
                   </>
                 ) : (
