@@ -11,5 +11,10 @@
     "install:all": "cd stock-event-analyzer-backend && npm install && cd ../stock-event-analyzer-frontend && npm install"
   },
   "author": "",
-  "license": "ISC"
-} 
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
+  }
+}

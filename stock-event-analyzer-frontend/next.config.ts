@@ -1,4 +1,4 @@
-/** @type {import('next').NextConfig} */
+     /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
     domains: [
@@ -30,6 +30,10 @@ const nextConfig = {
   // Disable TypeScript errors during production builds
   typescript: {
     ignoreBuildErrors: true,
+  },
+  // Load environment variables from parent directory
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'
   },
 };
 

@@ -9,7 +9,14 @@ services:
     depends_on:
       - backend
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:4000
+      - NEXT_PUBLIC_API_URL=http://backend:4000
+      - NODE_ENV=production
+    volumes:
+      # Mount the root .env file for frontend
+      - ./.env:/app/.env
+      # Prevent overwriting node_modules and .next
+      - /app/node_modules
+      - /app/.next
     networks:
       - stock-event-network
 
@@ -20,14 +27,16 @@ services:
       - "4000:4000"
     environment:
       - PORT=4000
+      - NODE_ENV=production
       # You'll need to provide these values via an .env file or when running docker-compose
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY}
       - NEWS_API_KEY=${NEWS_API_KEY}
       - JWT_SECRET=${JWT_SECRET}
     volumes:
-      # Mount the .env file for backend credentials
-      - ./stock-event-analyzer-backend/.env:/app/.env
+      # Mount the root .env file for backend credentials
+      - ./.env:/app/.env
+      - /app/node_modules
     networks:
       - stock-event-network
 

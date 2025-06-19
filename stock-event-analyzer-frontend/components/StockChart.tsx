@@ -8,7 +8,7 @@ interface StockDataPoint {
   close: number;
 }
 
-interface StockData {
+export interface StockData {
   oneWeek: StockDataPoint[];
   oneMonth: StockDataPoint[];
   threeMonths: StockDataPoint[];
@@ -16,33 +16,14 @@ interface StockData {
 }
 
 interface StockChartProps {
-  onFetchData: (startDate: string) => void;
-  stockData: StockData | null;
-  isLoading: boolean;
-  symbol: string;
-  eventDate?: string; // Date from OpenAI response
+  data: StockData | null;
+  eventDate?: string; // Date from the event
 }
 
 type TimePeriod = 'oneWeek' | 'oneMonth' | 'threeMonths' | 'sixMonths';
 
-export default function StockChart({ onFetchData, stockData, isLoading, symbol, eventDate }: StockChartProps) {
-  const [selectedDate, setSelectedDate] = useState("");
+export default function StockChart({ data, eventDate }: StockChartProps) {
   const [activePeriod, setActivePeriod] = useState<TimePeriod>('oneMonth');
-
-  // Auto-fetch data when eventDate is provided
-  useEffect(() => {
-    if (eventDate) {
-      setSelectedDate(eventDate);
-      onFetchData(eventDate);
-    }
-  }, [eventDate, onFetchData]);
-
-  const handleDateSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedDate) {
-      onFetchData(selectedDate);
-    }
-  };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -64,8 +45,8 @@ export default function StockChart({ onFetchData, stockData, isLoading, symbol, 
   };
 
   const getCurrentData = () => {
-    if (!stockData) return [];
-    return stockData[activePeriod] || [];
+    if (!data) return [];
+    return data[activePeriod] || [];
   };
 
   const getPeriodLabel = (period: TimePeriod) => {
@@ -99,58 +80,21 @@ export default function StockChart({ onFetchData, stockData, isLoading, symbol, 
       </div>
 
       <div className="p-6 space-y-8">
-        {/* Date Input Form */}
-        <form onSubmit={handleDateSubmit} className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="flex flex-col w-full sm:w-auto">
-            <label htmlFor="startDate" className="text-lg font-medium text-blue-300 mb-2 flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              {eventDate ? "Event Date:" : "Select Start Date:"}
-            </label>
-            <input
-              type="date"
-              id="startDate"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-4 py-3 text-lg bg-black/20 text-white rounded-xl border border-white/10 outline-none transition-all focus:border-blue-500"
-              required
-              disabled={!!eventDate}
-            />
-          </div>
-          {!eventDate && (
-            <button
-              type="submit"
-              disabled={isLoading || !selectedDate}
-              className="px-8 py-3 mt-8 sm:mt-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-lg font-medium rounded-xl shadow-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
-                  <span>Fetching...</span>
-                </div>
-              ) : (
-                <span className="flex items-center justify-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                  </svg>
-                  Get Stock Data
-                </span>
-              )}
-            </button>
-          )}
-        </form>
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-2 border-blue-400 border-t-transparent rounded-full animate-spin mr-4"></div>
-            <span className="text-xl text-blue-200">Fetching S&P 500 data...</span>
+        {/* Event Date Display */}
+        {eventDate && (
+          <div className="flex items-center bg-black/20 p-4 rounded-xl">
+            <svg className="w-6 h-6 mr-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <div>
+              <div className="text-sm text-blue-200">Event Date:</div>
+              <div className="text-lg font-medium text-white">{eventDate}</div>
+            </div>
           </div>
         )}
 
         {/* Chart Display */}
-        {stockData && !isLoading && (
+        {data ? (
           <div className="space-y-6">
             
             {/* Time Period Tabs */}
@@ -240,6 +184,14 @@ export default function StockChart({ onFetchData, stockData, isLoading, symbol, 
                 </div>
               </div>
             )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <svg className="w-16 h-16 text-blue-400/30 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
+            <h3 className="text-2xl font-bold text-blue-300 mb-2">No Stock Data Available</h3>
+            <p className="text-blue-200/70 max-w-md">No market data is available for this event. Try searching for a different historical event.</p>
           </div>
         )}
       </div>

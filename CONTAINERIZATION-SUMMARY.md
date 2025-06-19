@@ -22,8 +22,15 @@
    - Used environment variable `NEXT_PUBLIC_API_URL` with fallback
    - Updated all API call endpoints to use this function
 
-6. **Added Documentation**
+6. **Environment Variables Setup**
+   - Configured to use a single `.env` file in the root directory
+   - Backend configured to look for .env file in parent directory
+   - Docker Compose files set up to mount the root `.env` file
+   - See `ENV-README.md` for detailed instructions
+
+7. **Added Documentation**
    - `DOCKER-README.md` with instructions for users
+   - `ENV-README.md` with environment setup instructions
 
 ## How to Run the Application
 
@@ -41,7 +48,7 @@ docker-compose -f docker-compose.dev.yml up --build
 
 ## Configuration
 
-Before running, create a `.env` file in the `stock-event-analyzer-backend` directory with:
+Before running, create a `.env` file in the project root directory with:
 
 ```
 OPENAI_API_KEY=your_openai_key_here
@@ -49,7 +56,10 @@ ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key_here
 NEWS_API_KEY=your_news_api_key_here
 JWT_SECRET=a_secure_random_string_for_jwt
 PORT=4000
+NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
+
+See `ENV-README.md` for more detailed instructions.
 
 ## Benefits of Our Containerization Approach
 
@@ -58,6 +68,7 @@ PORT=4000
 3. **Simplified Dependencies**: Each service manages its own dependencies
 4. **Easy Deployment**: Just run `docker-compose up` to start everything
 5. **Development Workflow**: Development mode with live reloading for faster iteration
+6. **Environment Variables**: Single `.env` file approach for easier management
 
 ## Next Steps
 
