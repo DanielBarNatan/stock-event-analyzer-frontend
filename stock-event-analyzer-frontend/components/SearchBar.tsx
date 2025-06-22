@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getApiBaseUrl } from "../utils/api";
+import { getApiBaseUrl, getFastApiBaseUrl } from "../utils/api";
 
 interface SearchBarProps {
   onSearchResults: (data: any) => void;
@@ -21,7 +21,8 @@ export default function SearchBar({ onSearchResults, onLoading, searchValue, set
     onLoading(true);
 
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/historical-event?query=${encodeURIComponent(currentQuery)}`);
+      // Use FastAPI service for historical event searches
+      const response = await fetch(`${getFastApiBaseUrl()}/api/historical-event?query=${encodeURIComponent(currentQuery)}`);
       const data = await response.json();
       
       if (response.ok) {
