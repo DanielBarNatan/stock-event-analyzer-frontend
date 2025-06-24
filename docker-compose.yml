@@ -8,8 +8,10 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+      - fastapi
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:4000
+      - NEXT_PUBLIC_FASTAPI_URL=http://fastapi:8000
       - NODE_ENV=production
     volumes:
       # Mount the root .env file for frontend
@@ -37,6 +39,19 @@ services:
       # Mount the root .env file for backend credentials
       - ./.env:/app/.env
       - /app/node_modules
+    networks:
+      - stock-event-network
+
+  fastapi:
+    build:
+      context: ./stock-event-analyzer-fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      # Mount the root .env file for FastAPI service
+      - ./.env:/app/.env
     networks:
       - stock-event-network
 
